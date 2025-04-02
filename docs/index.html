@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Faith-Based University Survivability</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .tooltip {
+      position: absolute;
+      background: white;
+      border: 1px solid #ccc;
+      padding: 10px;
+      font-size: 14px;
+      display: none;
+      pointer-events: none;
+    }
+    svg {
+      overflow: visible;
+    }
+    .bar:hover {
+      fill: #2a9d8f;
+    }
+    .label {
+      font-size: 12px;
+      text-anchor: end;
+    }
+  </style>
+</head>
+<body>
+  <h1>Faith-Based University Survivability Rankings</h1>
+  <svg width="1000" height="800"></svg>
+  <div class="tooltip" id="tooltip"></div>
+
+  <script>
+    const data = [{"Religion": "Not applicable", "num_universities": 209, "avg_market": 52.48, "avg_efficiency": 52.82, "avg_acfi": 50.59, "avg_survivability": 51.79}, {"Religion": "Roman Catholic", "num_universities": 145, "avg_market": 50.87, "avg_efficiency": 50.67, "avg_acfi": 50.08, "avg_survivability": 50.52}, {"Religion": "Methodist", "num_universities": 87, "avg_market": 45.77, "avg_efficiency": 45.71, "avg_acfi": 50.85, "avg_survivability": 47.79}, {"Religion": "Baptist", "num_universities": 57, "avg_market": 46.49, "avg_efficiency": 46.89, "avg_acfi": 50.4, "avg_survivability": 48.14}, {"Religion": "Presbyterian", "num_universities": 52, "avg_market": 41.3, "avg_efficiency": 42.3, "avg_acfi": 51.63, "avg_survivability": 45.63}, {"Religion": "Protestant", "num_universities": 47, "avg_market": 42.82, "avg_efficiency": 46.05, "avg_acfi": 51.71, "avg_survivability": 47.02}, {"Religion": "Interdenominational", "num_universities": 47, "avg_market": 53.82, "avg_efficiency": 49.83, "avg_acfi": 51.72, "avg_survivability": 52.18}, {"Religion": "Lutheran", "num_universities": 29, "avg_market": 45.52, "avg_efficiency": 46.09, "avg_acfi": 50.16, "avg_survivability": 47.49}, {"Religion": "Anabaptist", "num_universities": 14, "avg_market": 37.21, "avg_efficiency": 43.12, "avg_acfi": 57.15, "avg_survivability": 46.37}, {"Religion": "Churches of Christ", "num_universities": 10, "avg_market": 43.1, "avg_efficiency": 48.72, "avg_acfi": 50.0, "avg_survivability": 46.98}, {"Religion": "United Church of Christ", "num_universities": 10, "avg_market": 40.22, "avg_efficiency": 44.89, "avg_acfi": 50.72, "avg_survivability": 45.35}, {"Religion": "Seventh Day Adventist", "num_universities": 9, "avg_market": 34.58, "avg_efficiency": 42.25, "avg_acfi": 50.81, "avg_survivability": 42.61}, {"Religion": "Other", "num_universities": 7, "avg_market": 28.01, "avg_efficiency": 39.2, "avg_acfi": 65.31, "avg_survivability": 45.18}, {"Religion": "Friends", "num_universities": 6, "avg_market": 37.97, "avg_efficiency": 43.36, "avg_acfi": 50.74, "avg_survivability": 44.16}, {"Religion": "Church of God", "num_universities": 6, "avg_market": 39.31, "avg_efficiency": 44.17, "avg_acfi": 49.88, "avg_survivability": 44.51}, {"Religion": "Pentecostal", "num_universities": 5, "avg_market": 39.55, "avg_efficiency": 46.23, "avg_acfi": 48.47, "avg_survivability": 44.46}, {"Religion": "Episcopal", "num_universities": 5, "avg_market": 42.82, "avg_efficiency": 44.02, "avg_acfi": 50.66, "avg_survivability": 46.2}, {"Religion": "Jewish", "num_universities": 3, "avg_market": 45.02, "avg_efficiency": 54.16, "avg_acfi": 50.25, "avg_survivability": 48.94}, {"Religion": "Evangelical Christian", "num_universities": 2, "avg_market": 39.74, "avg_efficiency": 41.24, "avg_acfi": 47.04, "avg_survivability": 42.96}, {"Religion": "Wesleyan", "num_universities": 2, "avg_market": 43.62, "avg_efficiency": 27.5, "avg_acfi": 58.06, "avg_survivability": 46.18}, {"Religion": "The Church of Jesus Christ of Latter-day Saints", "num_universities": 1, "avg_market": 42.43, "avg_efficiency": 40.98, "avg_acfi": 48.88, "avg_survivability": 44.72}];
+    data.sort((a, b) => b.avg_survivability - a.avg_survivability);
+
+    const svg = d3.select("svg"),
+          margin = {top: 20, right: 40, bottom: 40, left: 230},
+          width = +svg.attr("width") - margin.left - margin.right,
+          height = +svg.attr("height") - margin.top - margin.bottom;
+
+    const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+    const x = d3.scaleLinear()
+      .domain([0, d3.max(data, d => d.avg_survivability)])
+      .range([0, width]);
+
+    const y = d3.scaleBand()
+      .domain(data.map(d => d.Religion))
+      .rangeRound([0, height])
+      .padding(0.2);
+
+    const tooltip = d3.select("#tooltip");
+
+    g.append("g")
+      .selectAll("rect")
+      .data(data)
+      .join("rect")
+        .attr("class", "bar")
+        .attr("x", 0)
+        .attr("y", d => y(d.Religion))
+        .attr("width", d => x(d.avg_survivability))
+        .attr("height", y.bandwidth())
+        .attr("fill", "#457b9d")
+        .on("mouseover", (event, d) => {
+          tooltip.style("display", "block").html(`
+            <strong>${d.Religion}</strong><br/>
+            Universities: ${d.num_universities}<br/>
+            Market Saturation: ${d.avg_market}<br/>
+            Academic Efficiency: ${d.avg_efficiency}<br/>
+            aCFI: ${d.avg_acfi}<br/>
+            Survivability: ${d.avg_survivability}
+          `);
+        })
+        .on("mousemove", event => {
+          tooltip.style("left", (event.pageX + 10) + "px")
+                 .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", () => tooltip.style("display", "none"));
+
+    g.append("g")
+      .call(d3.axisLeft(y).tickSize(0))
+      .selectAll("text")
+      .style("font-size", "13px");
+
+    g.append("g")
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(x).ticks(5))
+      .selectAll("text")
+      .style("font-size", "12px");
+  </script>
+</body>
+</html>
