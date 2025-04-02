@@ -3,19 +3,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Faith-Based Survivability Rankings</title>
+  <title>Faith-Based University Survivability</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #f8f9fa;
+      background: #f4f4f4;
       margin: 0;
       padding: 40px;
     }
     h1 {
       text-align: center;
-      margin-bottom: 40px;
       color: #333;
+      margin-bottom: 30px;
     }
     .tooltip {
       position: absolute;
@@ -32,13 +32,12 @@
       overflow: visible;
     }
     .bar {
-      rx: 4;
-      ry: 4;
+      rx: 6;
+      ry: 6;
     }
     .bar:hover {
-      opacity: 0.8;
-      stroke: #333;
-      stroke-width: 1;
+      fill: #2a9d8f;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -64,38 +63,34 @@
     const y = d3.scaleBand()
       .domain(data.map(d => d.Religion))
       .rangeRound([0, height])
-      .paddingInner(0.3);
+      .padding(0.2);
 
     const tooltip = d3.select("#tooltip");
 
-    const colorScale = d3.scaleThreshold()
-      .domain([0.4, 0.55, 0.7])
-      .range(["#f46d43", "#fee08b", "#66bd63", "#1a9850"]);
-
     g.selectAll(".bar")
       .data(data)
-      .enter().append("rect")
-      .attr("class", "bar")
-      .attr("x", 0)
-      .attr("y", d => y(d.Religion) + y.bandwidth() / 2 - d.bar_height / 2)
-      .attr("width", d => x(d.avg_survivability))
-      .attr("height", d => d.bar_height)
-      .attr("fill", d => colorScale(d.avg_survivability))
-      .on("mouseover", (event, d) => {
-        tooltip.style("display", "block").html(`
-          <strong>${d.Religion}</strong><br/>
-          Universities: ${d.num_universities}<br/>
-          Market Saturation: ${d.avg_market}<br/>
-          Academic Efficiency: ${d.avg_efficiency}<br/>
-          aCFI: ${d.avg_acfi}<br/>
-          Survivability: ${d.avg_survivability}
-        `);
-      })
-      .on("mousemove", event => {
-        tooltip.style("left", (event.pageX + 10) + "px")
-               .style("top", (event.pageY - 28) + "px");
-      })
-      .on("mouseout", () => tooltip.style("display", "none"));
+      .join("rect")
+        .attr("class", "bar")
+        .attr("x", 0)
+        .attr("y", d => y(d.Religion))
+        .attr("width", d => x(d.avg_survivability))
+        .attr("height", y.bandwidth())
+        .attr("fill", "#457b9d")
+        .on("mouseover", (event, d) => {
+          tooltip.style("display", "block").html(`
+            <strong>${d.Religion}</strong><br/>
+            Universities: ${d.num_universities}<br/>
+            Market Saturation: ${d.avg_market}<br/>
+            Academic Efficiency: ${d.avg_efficiency}<br/>
+            aCFI: ${d.avg_acfi}<br/>
+            Survivability: ${d.avg_survivability}
+          `);
+        })
+        .on("mousemove", event => {
+          tooltip.style("left", (event.pageX + 10) + "px")
+                 .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", () => tooltip.style("display", "none"));
 
     g.append("g")
       .call(d3.axisLeft(y).tickSize(0))
