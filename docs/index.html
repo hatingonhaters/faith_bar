@@ -5,9 +5,28 @@
   <meta charset="UTF-8">
   <title>Faith-Based University Survivability</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
-  <style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
+        background: #f4f7fa;
+    }
+    h1 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #2d2d2d;
+    }
+    .bar {
+        filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.15));
+    }
+    .bar:hover {
+        fill: #ff9900 !important;
+    }
+    .tooltip {
+        border-radius: 6px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
       background: #f4f4f4;
       margin: 0;
       padding: 40px;
@@ -57,13 +76,19 @@
     const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
     const x = d3.scaleLinear()
-      .domain([0, d3.max(data, d => d.avg_survivability)])
+      .domain([40, 55])
       .range([0, width]);
 
     const y = d3.scaleBand()
       .domain(data.map(d => d.Religion))
       .rangeRound([0, height])
       .padding(0.2);
+
+    
+    const color = d3.scaleLinear()
+      .domain([40, 55])
+      .range(["#e63946", "#1d3557"]); // red to cool blue
+
 
     const tooltip = d3.select("#tooltip");
 
@@ -75,7 +100,7 @@
         .attr("y", d => y(d.Religion))
         .attr("width", d => x(d.avg_survivability))
         .attr("height", y.bandwidth())
-        .attr("fill", "#457b9d")
+        .attr("fill", d => color(d.avg_survivability))
         .on("mouseover", (event, d) => {
           tooltip.style("display", "block").html(`
             <strong>${d.Religion}</strong><br/>
